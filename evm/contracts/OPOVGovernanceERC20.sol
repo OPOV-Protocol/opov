@@ -15,13 +15,11 @@ import {PluginCloneable, IDAO} from '@aragon/osx/core/plugin/PluginCloneable.sol
 import {DAO} from '@aragon/osx/core/dao/DAO.sol';
 import {PermissionManager} from '@aragon/osx/core/permission/PermissionManager.sol';
 import {IERC20MintableUpgradeable} from "@aragon/osx/token/ERC20/IERC20MintableUpgradeable.sol";
-import {ByteHasher} from "./helpers/ByteHasher.sol";
-import {IWorldID} from "./interfaces/IWorldID.sol";
 
 /// @title WorldIDVerifierPlugin
 /// @author paulburke.eth
 /// @notice A plugin that allows users to mint tokens after verifying their WorldID proof.
-contract WorldIDVerifierPlugin is
+contract OPOVGovernanceERC20 is
 PluginCloneable,
 IERC20MintableUpgradeable,
 ERC165Upgradeable,
@@ -46,27 +44,9 @@ PermissionManager
     /// @param amountsArrayLength The length of the `amounts` array.
     error MintSettingsArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
 
-    using ByteHasher for bytes;
-
-    /// @notice Thrown when attempting to reuse a nullifier
-    error InvalidNullifier();
-
-    /// @dev The World ID instance that will be used for verifying proofs
-    IWorldID internal immutable worldId;
-
-    /// @dev The contract's external nullifier hash
-    uint256 internal immutable externalNullifier;
-
-    /// @dev The World ID group ID (always 1)
-    uint256 internal immutable groupId = 1;
-
-    /// @dev Whether a nullifier hash has been used already. Used to guarantee an action is only performed once by a single person
-    mapping(uint256 => bool) internal nullifierHashes;
-
     /// @param _dao The associated DAO.
     constructor(
         IDAO _dao,
-        IWorldID _worldId,
         string memory _name,
         string memory _symbol,
         MintSettings memory _mintSettings
@@ -79,7 +59,6 @@ PermissionManager
     /// @param _admin The address of the admin.
     function initialize(
         IDAO _dao,
-        IWorldID _worldId,
         string memory _name,
         string memory _symbol,
         MintSettings memory _mintSettings
@@ -92,17 +71,12 @@ PermissionManager
             });
         }
 
-        worldId = _worldId;
-        externalNullifier = abi
-            .encodePacked(abi.encodePacked(_appId).hashToField(), _actionId)
-            .hashToField();
-
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __PluginCloneable_init(_dao); // Must call to be associated with a DAO and use the DAO's PermissionManager
         __PermissionManager_init(msg.sender);
 
-        for (uint256 i; i < _mintSettings.receivers.length; ) {
+        for (uint256 i; i < _mintSettings.receivers.length;) {
             _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);
 
             unchecked {
@@ -124,27 +98,14 @@ PermissionManager
     /// @param _root The WorldID merkle root to verify against.
     /// @param _nullifierHash The nullifier hash for the proof.
     /// @param _proof The array of proof elements returned by WorldID.
-    function mintAndVerify(
-        uint256 _amount,
-        uint256 _root,
-        uint256 _nullifierHash,
-        uint256[8] calldata _proof
-    ) external {
+    function mintAndVerify(uint256 _amount) external {
 
         // Verify nullifier not already used
         if (nullifierHashes[_nullifierHash]) {
             revert InvalidNullifier();
         }
 
-        // Verify WorldID proof
-        worldId.verifyProof(
-            _root,
-            groupId,
-            keccak256(abi.encodePacked(msg.sender)),
-            _nullifierHash,
-            externalNullifier,
-            _proof
-        );
+        // TODO Verify attestation
 
         grant(address(this), msg.sender, MINT_PERMISSION_ID);
 
@@ -157,9 +118,6 @@ PermissionManager
         if (prevBalance == 0) {
             emit MembersAdded([msg.sender]);
         }
-
-        // Mark nullifier as used
-        nullifierHashes[_nullifierHash] = true;
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
