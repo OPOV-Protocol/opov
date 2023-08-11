@@ -6,15 +6,14 @@ import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {ByteHasher} from "./helpers/ByteHasher.sol";
 import {IWorldID} from "./interfaces/IWorldID.sol";
-import "./lz/NonblockingLzApp.sol";
-import {PoPSchema} from "../structs/PopSchema.sol";
+import {NonblockingLzApp} from "./lz/NonblockingLzApp.sol";
+import "./structs/PopSchema.sol";
 
 // Optimism
-contract OPOVPoPVerifier is NonblockingLzApp, Initializable {
+contract OPOVPoPVerifier is NonblockingLzApp, ReentrancyGuard {
 
     using ByteHasher for bytes;
 
@@ -52,7 +51,7 @@ contract OPOVPoPVerifier is NonblockingLzApp, Initializable {
     uint256 internal immutable externalNullifier;
 
     /// @dev The World ID group ID
-    uint256 internal immutable groupId;
+    uint8 internal immutable groupId;
 
     /// @dev Whether a nullifier hash has been used already. Used to guarantee an action is only performed once by a single person
     mapping(uint256 => bool) internal nullifierHashes;
@@ -67,13 +66,13 @@ contract OPOVPoPVerifier is NonblockingLzApp, Initializable {
     /// @param _actionId The World ID action ID
     /// @param _lzEndpoint The endpoint of the LayerZero contract
     /// @param _dstChainId The chain id of the LayerZero destination chain
-    function initialize(
+    constructor(
         IWorldID _worldId,
         string memory _appId,
         string memory _actionId,
         address _lzEndpoint,
         uint16 _dstChainId
-    ) NonblockingLzApp(_lzEndpoint) public initializer {
+    ) NonblockingLzApp(_lzEndpoint) {
         worldId = _worldId;
         dstChainId = _dstChainId;
         externalNullifier = abi
@@ -84,20 +83,20 @@ contract OPOVPoPVerifier is NonblockingLzApp, Initializable {
         groupId = 1; // Orb verification only
     }
 
-    function estimateFee(bool _useZro, bytes calldata _adapterParams) public view returns (uint nativeFee, uint zroFee) {
-        return lzEndpoint.estimateFees(dstChainId, address(this), PAYLOAD, _useZro, _adapterParams);
+    function estimateFee(bool _useZro, bytes calldata _adapterParams, bytes calldata _payload) public view returns (uint nativeFee, uint zroFee) {
+        return lzEndpoint.estimateFees(dstChainId, address(this), _payload, _useZro, _adapterParams);
     }
 
     function setAttester(address _attester) public onlyOwner {
         attester = _attester;
-        setTrustedRemoteAddress(dstChainId, abi.encode(_attester));
+        this.setTrustedRemoteAddress(dstChainId, abi.encode(_attester));
         emit AttesterSet(_attester);
     }
 
-    /// @param signal An arbitrary input from the user, usually the user's wallet address
-    /// @param root The root of the Merkle tree (returned by the JS widget).
-    /// @param nullifierHash The nullifier hash for this proof, preventing double signaling (returned by the JS widget).
-    /// @param proof The zero-knowledge proof that demonstrates the claimer is registered with World ID (returned by the JS widget).
+    /// @param _signal An arbitrary input from the user, usually the user's wallet address
+    /// @param _root The root of the Merkle tree (returned by the JS widget).
+    /// @param _nullifierHash The nullifier hash for this proof, preventing double signaling (returned by the JS widget).
+    /// @param _proof The zero-knowledge proof that demonstrates the claimer is registered with World ID (returned by the JS widget).
     /// @dev Feel free to rename this method however you want! We've used `claim`, `verify` or `execute` in the past.
     function verifyAndExecute(
         address _signal,
@@ -131,15 +130,24 @@ contract OPOVPoPVerifier is NonblockingLzApp, Initializable {
             timestamp: uint64(block.timestamp)
         });
 
-        bytes payload = abi.encode(data);
+        bytes memory payload = abi.encode(data);
         _lzSend(
             dstChainId,
             payload,
             payable(msg.sender),
             address(0x0),
-            bytes("")
+            bytes(""),
+            0
         );
 
         emit MessageSent(dstChainId, attester, payload);
+    }
+
+    function _nonblockingLzReceive(
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) internal override {
     }
 }

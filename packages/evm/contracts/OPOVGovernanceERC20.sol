@@ -11,20 +11,19 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
-import {PluginCloneable, IDAO} from '@aragon/osx/core/plugin/PluginCloneable.sol';
+import {PluginCloneable, IDAO, DaoAuthorizableUpgradeable} from '@aragon/osx/core/plugin/PluginCloneable.sol';
 import {DAO} from '@aragon/osx/core/dao/DAO.sol';
-import {PermissionManager} from '@aragon/osx/core/permission/PermissionManager.sol';
 import {IERC20MintableUpgradeable} from "@aragon/osx/token/ERC20/IERC20MintableUpgradeable.sol";
 
 /// @title WorldIDVerifierPlugin
 /// @author paulburke.eth
 /// @notice A plugin that allows users to mint tokens after verifying their WorldID proof.
 contract OPOVGovernanceERC20 is
-PluginCloneable,
 IERC20MintableUpgradeable,
+Initializable,
 ERC165Upgradeable,
 ERC20VotesUpgradeable,
-PermissionManager
+DaoAuthorizableUpgradeable
 {
 
     /// @notice The permission identifier to mint new tokens
@@ -51,18 +50,15 @@ PermissionManager
         string memory _symbol,
         MintSettings memory _mintSettings
     ) {
-        initialize(_dao, _worldId, _name, _symbol, _mintSettings);
+        initialize(_dao, _name, _symbol, _mintSettings);
     }
 
-    /// @notice Initializes the contract.
-    /// @param _dao The associated DAO.
-    /// @param _admin The address of the admin.
     function initialize(
         IDAO _dao,
         string memory _name,
         string memory _symbol,
         MintSettings memory _mintSettings
-    ) external initializer {
+    ) public initializer {
         // Check mint settings
         if (_mintSettings.receivers.length != _mintSettings.amounts.length) {
             revert MintSettingsArrayLengthMismatch({
@@ -73,8 +69,7 @@ PermissionManager
 
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
-        __PluginCloneable_init(_dao); // Must call to be associated with a DAO and use the DAO's PermissionManager
-        __PermissionManager_init(msg.sender);
+        __DaoAuthorizableUpgradeable_init(_dao);
 
         for (uint256 i; i < _mintSettings.receivers.length;) {
             _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);
@@ -95,19 +90,10 @@ PermissionManager
     /// @notice Mints `_amount` of `_token` to `msg.sender` after verifying their WorldID proof.
     /// @dev The WorldID proof prevents sybil attacks by ensuring each user can only mint from a single account.
     /// @param _amount The number of tokens to mint.
-    /// @param _root The WorldID merkle root to verify against.
-    /// @param _nullifierHash The nullifier hash for the proof.
-    /// @param _proof The array of proof elements returned by WorldID.
     function mintAndVerify(uint256 _amount) external {
-
-        // Verify nullifier not already used
-        if (nullifierHashes[_nullifierHash]) {
-            revert InvalidNullifier();
-        }
-
         // TODO Verify attestation
 
-        grant(address(this), msg.sender, MINT_PERMISSION_ID);
+//        grant(address(this), msg.sender, MINT_PERMISSION_ID);
 
         uint prevBalance = balanceOf(msg.sender);
 
@@ -115,9 +101,9 @@ PermissionManager
         _mint(msg.sender, _amount);
 
         // Check if member before
-        if (prevBalance == 0) {
-            emit MembersAdded([msg.sender]);
-        }
+//        if (prevBalance == 0) {
+//            emit MembersAdded([msg.sender]);
+//        }
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.

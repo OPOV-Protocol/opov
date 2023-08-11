@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IEAS, Attestation, AttestationRequest, AttestationRequestData} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+import {
+    IEAS,
+    Attestation,
+    AttestationRequest,
+    AttestationRequestData
+} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+import { NO_EXPIRATION_TIME, EMPTY_UID } from "@ethereum-attestation-service/eas-contracts/contracts/Common.sol";
 
-import "./lz/NonblockingLzApp.sol";
+import {NonblockingLzApp} from "./lz/NonblockingLzApp.sol";
 import "./structs/PopSchema.sol";
 
 /// Base
-contract OPOVAttester is NonblockingLzApp, Initializable {
+contract OPOVAttester is NonblockingLzApp {
 
     event MessageReceived(
         uint16 srcChainId,
@@ -32,18 +37,18 @@ contract OPOVAttester is NonblockingLzApp, Initializable {
 
     mapping(address => bytes32) internal attestations;
 
-    function initialize(
+    constructor(
         IEAS _eas,
         bytes32 _schema,
         address _lzEndpoint,
         address _verifier,
         uint16 _dstChainId
-    ) NonblockingLzApp(_lzEndpoint) public initializer {
+    ) NonblockingLzApp(_lzEndpoint) {
         eas = _eas;
         schema = _schema;
         verifier = _verifier;
 
-        setTrustedRemoteAddress(dstChainId, abi.encode(verifier));
+        this.setTrustedRemoteAddress(_dstChainId, abi.encode(_verifier));
     }
 
     function isVerified(address _address) public view returns (bool) {
@@ -60,32 +65,40 @@ contract OPOVAttester is NonblockingLzApp, Initializable {
         return true;
     }
 
-    function createAttestation(PoPSchema calldata data) external returns (bytes32) {
+    function createAttestation(PoPSchema memory data) private returns (bytes32) {
         bytes memory encodedData = abi.encode(data);
 
         AttestationRequest memory request = AttestationRequest({
             schema: schema,
-            data: encodedData
+            data: AttestationRequestData({
+                data: encodedData,
+                recipient: address(0), // No recipient
+                expirationTime: NO_EXPIRATION_TIME, // No expiration time
+                revocable: true,
+                refUID: EMPTY_UID, // No references UI
+                value: 0 // No value/ETH
+            })
         });
 
         return eas.attest(request);
     }
 
-    function lzReceive(
+    function _nonblockingLzReceive(
         uint16 _srcChainId,
         bytes memory _srcAddress,
         uint64 _nonce,
         bytes memory _payload
-    ) override external {
-        require(msg.sender == address(endpoint));
+    ) internal override {
+        require(msg.sender == address(lzEndpoint));
         require(keccak256(_srcAddress) == keccak256(abi.encode(verifier)));
 
         emit MessageReceived(_srcChainId, _srcAddress, _nonce, _payload);
 
-        PoPSchema data = abi.decode(_payload, (PoPSchema));
+        PoPSchema memory data = abi.decode(_payload, (PoPSchema));
 
         bytes32 uid = createAttestation(data);
-        attestations[data.signal] = uid;
+        address addr = address(data.signal);
+        attestations[addr] = uid;
         emit AttestationCreated(uid, schema, _payload, verifier);
     }
 }
