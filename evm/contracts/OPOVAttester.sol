@@ -10,16 +10,27 @@ import "./structs/PopSchema.sol";
 /// Base
 contract OPOVAttester is NonblockingLzApp, Initializable {
 
-    address public owner;
+    event MessageReceived(
+        uint16 srcChainId,
+        bytes srcAddress,
+        uint64 nonce,
+        bytes payload
+    );
+
+    event AttestationCreated(
+        bytes32 uid,
+        bytes32 schema,
+        bytes data,
+        address attester
+    );
 
     IEAS internal immutable eas;
 
-    bytes32 schema;
+    bytes32 internal schema;
 
     address internal verifier;
 
-    /// @dev Chain id of the verifier
-    uint16 private dstChainId;
+    mapping(address => bytes32) internal attestations;
 
     function initialize(
         IEAS _eas,
@@ -28,16 +39,28 @@ contract OPOVAttester is NonblockingLzApp, Initializable {
         address _verifier,
         uint16 _dstChainId
     ) NonblockingLzApp(_lzEndpoint) public initializer {
-        owner = msg.sender;
         eas = _eas;
         schema = _schema;
         verifier = _verifier;
-        dstChainId = _dstChainId;
 
         setTrustedRemoteAddress(dstChainId, abi.encode(verifier));
     }
 
-    function createAttestation(PoPSchema calldata data) external {
+    function isVerified(address _address) public view returns (bool) {
+        bytes32 uid = attestations[_address];
+        if (uid == 0) {
+            return false;
+        }
+
+        Attestation memory attestation = eas.getAttestation(uid);
+        if (attestation.attester != address(this)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function createAttestation(PoPSchema calldata data) external returns (bytes32) {
         bytes memory encodedData = abi.encode(data);
 
         AttestationRequest memory request = AttestationRequest({
@@ -45,7 +68,7 @@ contract OPOVAttester is NonblockingLzApp, Initializable {
             data: encodedData
         });
 
-        bytes32 uid = eas.attest(request);
+        return eas.attest(request);
     }
 
     function lzReceive(
@@ -57,7 +80,12 @@ contract OPOVAttester is NonblockingLzApp, Initializable {
         require(msg.sender == address(endpoint));
         require(keccak256(_srcAddress) == keccak256(abi.encode(verifier)));
 
+        emit MessageReceived(_srcChainId, _srcAddress, _nonce, _payload);
+
         PoPSchema data = abi.decode(_payload, (PoPSchema));
-        createAttestation(data);
+
+        bytes32 uid = createAttestation(data);
+        attestations[data.signal] = uid;
+        emit AttestationCreated(uid, schema, _payload, verifier);
     }
 }

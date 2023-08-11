@@ -14,7 +14,7 @@ import "./lz/NonblockingLzApp.sol";
 import {PoPSchema} from "../structs/PopSchema.sol";
 
 // Optimism
-contract PoPVerifier is NonblockingLzApp, Initializable {
+contract OPOVPoPVerifier is NonblockingLzApp, Initializable {
 
     using ByteHasher for bytes;
 
@@ -30,11 +30,6 @@ contract PoPVerifier is NonblockingLzApp, Initializable {
         uint256 root,
         uint256 nullifierHash
     );
-
-    /// @dev Emitted when a nullifier hash is registered in the contract.
-    /// This ensures that a proof is not used more than once.
-    /// @param nullifierHash The unique nullifier hash that's registered.
-    event NullifierRegistered(uint256 nullifierHash);
 
     /// @dev Emitted when the attester for the contract is set or updated.
     /// @param attester The address of the attester.
@@ -123,13 +118,11 @@ contract PoPVerifier is NonblockingLzApp, Initializable {
             _proof
         );
 
-        emit VerificationSuccessful(_signal, _root, _nullifierHash);
-
         // We now record the user has done this, so they can't do it again (proof of uniqueness)
         // TODO Implement a commitment scheme to prevent front-running
         nullifierHashes[_nullifierHash] = true;
 
-        emit NullifierRegistered(_nullifierHash);
+        emit VerificationSuccessful(_signal, _root, _nullifierHash);
 
         PoPSchema memory data = PoPSchema({
             action: "verify",
