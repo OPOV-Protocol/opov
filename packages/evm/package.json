@@ -9,7 +9,9 @@
     "deploy-attester": "hardhat deploy --tags attester --network base-goerli",
     "set-verifier": "hardhat setVerifier --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network base-goerli",
     "balance": "hardhat balance --network optimism-goerli",
-    "listAccounts": "hardhat listAccounts --network optimism-goerli"
+    "listAccounts": "hardhat listAccounts --network optimism-goerli",
+    "clean": "hardhat clean",
+    "verify-verifier": "hardhat verify --network optimism-goerli 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 0x11cA3127182f7583EfC416a8771BD4d11Fae4334 app_staging_465fadc3db6afe30e7b43ea029771dcd pop-verification 0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1 10160"
   },
   "dependencies": {
     "@types/node": "20.4.9",
@@ -21,8 +23,10 @@
     "@aragon/osx": "^1.3.0-rc0.2",
     "@ethereum-attestation-service/eas-contracts": "^1.0.0-beta.0",
     "@ethereum-attestation-service/eas-sdk": "^1.0.0-beta.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.4",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-verify": "^1.1.1",
     "@openzeppelin/contracts": "^4.9.3",
     "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "@typechain/ethers-v6": "^0.4.3",

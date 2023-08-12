@@ -8,6 +8,10 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         .then(res =>
             res.find(({key}) => key === 'op-goerli.id.worldcoin.eth')?.value);
 
+    if (!worldIDAddress) {
+        throw new Error('WorldID address not found');
+    }
+
     const ContractFactory = await ethers.getContractFactory('OPOVPoPVerifier');
 
     const deployTx = await ContractFactory.getDeployTransaction(

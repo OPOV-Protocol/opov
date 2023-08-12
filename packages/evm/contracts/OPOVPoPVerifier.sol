@@ -4,20 +4,15 @@ pragma solidity ^0.8.17;
 // TODO Remove when deploying to a live network.
 //import "hardhat/console.sol";
 
-//import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import {ByteHasher} from "./helpers/ByteHasher.sol";
 import {IWorldID} from "./interfaces/IWorldID.sol";
 import {NonblockingLzApp} from "./lz/NonblockingLzApp.sol";
 import "./structs/PopSchema.sol";
-//import "./helpers/BytesLib.sol";
 
 // Optimism
-contract OPOVPoPVerifier is
-NonblockingLzApp,
-ReentrancyGuard
-{
+contract OPOVPoPVerifier is NonblockingLzApp, ReentrancyGuard {
 
     using ByteHasher for bytes;
 
@@ -65,9 +60,9 @@ ReentrancyGuard
     mapping(uint256 => bool) internal nullifierHashes;
 
     /// @dev Base chain id
-    uint16 private dstChainId;
+    uint16 internal dstChainId;
 
-    address private attester;
+    address internal attester;
 
     /// @param _worldId The WorldID instance that will verify the proofs
     /// @param _appId The World ID app ID
@@ -158,55 +153,4 @@ ReentrancyGuard
         bytes memory _payload
     ) internal override {
     }
-//
-//    // generic config for LayerZero user Application
-//    function setConfig(uint16 _version, uint16 _chainId, uint _configType, bytes calldata _config) external override onlyOwner {
-//        lzEndpoint.setConfig(_version, _chainId, _configType, _config);
-//    }
-//
-//    function setSendVersion(uint16 _version) external override onlyOwner {
-//        lzEndpoint.setSendVersion(_version);
-//    }
-//
-//    function setReceiveVersion(uint16 _version) external override onlyOwner {
-//        lzEndpoint.setReceiveVersion(_version);
-//    }
-//
-//    function forceResumeReceive(uint16 _srcChainId, bytes calldata _srcAddress) external override onlyOwner {
-//        lzEndpoint.forceResumeReceive(_srcChainId, _srcAddress);
-//    }
-//
-//    // _path = abi.encodePacked(remoteAddress, localAddress)
-//    // this function set the trusted path for the cross-chain communication
-//    function setTrustedRemote(uint16 _remoteChainId, bytes memory _path) private {
-//        trustedRemoteLookup[_remoteChainId] = _path;
-//        emit SetTrustedRemote(_remoteChainId, _path);
-//    }
-//
-//    function setTrustedRemoteAddress(uint16 _remoteChainId, bytes memory _remoteAddress) private {
-//        trustedRemoteLookup[_remoteChainId] = abi.encodePacked(_remoteAddress, address(this));
-//        emit SetTrustedRemoteAddress(_remoteChainId, _remoteAddress);
-//    }
-//
-//    function getTrustedRemoteAddress(uint16 _remoteChainId) external view returns (bytes memory) {
-//        bytes memory path = trustedRemoteLookup[_remoteChainId];
-//        require(path.length != 0, "LzApp: no trusted path record");
-//        return BytesLib.slice(path, 0, path.length - 20); // the last 20 bytes should be address(this)
-//    }
-//
-//    function setPrecrime(address _precrime) external onlyOwner {
-//        precrime = _precrime;
-//        emit SetPrecrime(_precrime);
-//    }
-//
-//    function setMinDstGas(uint16 _dstChainId, uint16 _packetType, uint _minGas) external onlyOwner {
-//        require(_minGas > 0, "LzApp: invalid minGas");
-//        minDstGasLookup[_dstChainId][_packetType] = _minGas;
-//        emit SetMinDstGas(_dstChainId, _packetType, _minGas);
-//    }
-//
-//    // if the size is 0, it means default size limit
-//    function setPayloadSizeLimit(uint16 _dstChainId, uint _size) external onlyOwner {
-//        payloadSizeLimitLookup[_dstChainId] = _size;
-//    }
 }

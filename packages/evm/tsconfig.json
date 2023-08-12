@@ -11,6 +11,8 @@
   "include": [
     "hardhat.config.ts",
     "deploy/**/*",
-    "type-extensions.d.ts"
-  ]
+    "type-extensions.d.ts",
+    "./typechain-types"
+  ],
+  "files": ["./hardhat.config.ts"]
 }

@@ -2,10 +2,14 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-import {HardhatUserConfig, task} from 'hardhat/config';
-// import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
+import '@typechain/hardhat'
+import '@nomicfoundation/hardhat-ethers'
+import '@nomicfoundation/hardhat-chai-matchers'
+import "@nomicfoundation/hardhat-verify";
+
+import {HardhatUserConfig, task} from 'hardhat/config';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {Contract, Signer} from 'ethers';
 
@@ -74,8 +78,12 @@ const config: HardhatUserConfig = {
     },
     defaultNetwork: 'optimism-goerli',
     networks: {
+        'optimism-mainnet': {
+            url: `https://optimism-mainnet.infura.io/v3/${process.env.INFURA_KEY}`,
+            accounts: [process.env.WALLET_KEY as string],
+        },
         'optimism-goerli': {
-            url: `https://optimism-goerli.infura.io/v3/6ee90d72c4aa4cfd978f2592c98f8313`,
+            url: `https://optimism-goerli.infura.io/v3/${process.env.INFURA_KEY}`,
             accounts: [process.env.WALLET_KEY as string],
         },
         'base-mainnet': {
@@ -93,6 +101,9 @@ const config: HardhatUserConfig = {
             accounts: [process.env.WALLET_KEY as string],
             gasPrice: 1000000000,
         },
+    },
+    etherscan: {
+        apiKey: `${process.env.ETHERSCAN_KEY}`,
     },
 };
 
