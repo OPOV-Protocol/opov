@@ -8,6 +8,7 @@
     "set-attester": "hardhat setAttester --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network optimism-goerli",
     "deploy-attester": "hardhat deploy --tags attester --network base-goerli",
     "set-verifier": "hardhat setVerifier --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network base-goerli",
+    "deploy-dao": "hardhat deploy --tags dao --network base-goerli",
     "balance": "hardhat balance --network optimism-goerli",
     "listAccounts": "hardhat listAccounts --network optimism-goerli",
     "clean": "hardhat clean",
