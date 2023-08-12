@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import {
     IEAS,
     Attestation,
@@ -13,7 +14,7 @@ import {NonblockingLzApp} from "./lz/NonblockingLzApp.sol";
 import "./structs/PopSchema.sol";
 
 /// Base
-contract OPOVAttester is NonblockingLzApp {
+contract OPOVAttester is Ownable, NonblockingLzApp {
 
     event MessageReceived(
         uint16 srcChainId,
@@ -29,11 +30,17 @@ contract OPOVAttester is NonblockingLzApp {
         address attester
     );
 
+    /// @dev Emitted when the verifier for the contract is set or updated.
+    /// @param verifier The address of the verifier.
+    event VerifierSet(address indexed verifier);
+
     IEAS internal immutable eas;
 
     bytes32 internal schema;
 
     address internal verifier;
+
+    uint16 internal dstChainId;
 
     mapping(address => bytes32) internal attestations;
 
@@ -41,14 +48,17 @@ contract OPOVAttester is NonblockingLzApp {
         IEAS _eas,
         bytes32 _schema,
         address _lzEndpoint,
-        address _verifier,
         uint16 _dstChainId
     ) NonblockingLzApp(_lzEndpoint) {
         eas = _eas;
         schema = _schema;
-        verifier = _verifier;
+        dstChainId = _dstChainId;
+    }
 
-        this.setTrustedRemoteAddress(_dstChainId, abi.encode(_verifier));
+    function setVerifier(address _verifier) public onlyOwner {
+        verifier = _verifier;
+        setTrustedRemoteAddress(dstChainId, abi.encode(verifier));
+        emit VerifierSet(verifier);
     }
 
     function isVerified(address _address) public view returns (bool) {
@@ -65,7 +75,7 @@ contract OPOVAttester is NonblockingLzApp {
         return true;
     }
 
-    function createAttestation(PoPSchema memory data) private returns (bytes32) {
+    function createAttestation(PoPSchema memory data) internal returns (bytes32) {
         bytes memory encodedData = abi.encode(data);
 
         AttestationRequest memory request = AttestationRequest({

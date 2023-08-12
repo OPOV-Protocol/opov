@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 import {IERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-IERC20PermitUpgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -95,7 +95,7 @@ DaoAuthorizableUpgradeable
 
 //        grant(address(this), msg.sender, MINT_PERMISSION_ID);
 
-        uint prevBalance = balanceOf(msg.sender);
+//        uint prevBalance = balanceOf(msg.sender);
 
         // Mint DAO tokens
         _mint(msg.sender, _amount);

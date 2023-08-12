@@ -4,31 +4,36 @@
   "private": true,
   "scripts": {
     "compile": "hardhat compile",
-    "deploy": "hardhat deploy"
+    "deploy-verifier": "hardhat deploy --tags verifier --network optimism-goerli",
+    "set-attester": "hardhat setAttester --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network optimism-goerli",
+    "deploy-attester": "hardhat deploy --tags attester --network base-goerli",
+    "set-verifier": "hardhat setVerifier --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network base-goerli",
+    "balance": "hardhat balance --network optimism-goerli",
+    "listAccounts": "hardhat listAccounts --network optimism-goerli"
   },
   "dependencies": {
     "@types/node": "20.4.9",
-    "eslint": "8.46.0",
+    "dotenv": "^16.3.1",
+    "eslint": "8.47.0",
     "typescript": "5.1.6"
   },
   "devDependencies": {
     "@aragon/osx": "^1.3.0-rc0.2",
     "@ethereum-attestation-service/eas-contracts": "^1.0.0-beta.0",
-    "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
+    "@ethereum-attestation-service/eas-sdk": "^1.0.0-beta.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.4",
-    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "@nomicfoundation/hardhat-verify": "^1.0.0",
     "@openzeppelin/contracts": "^4.9.3",
     "@openzeppelin/contracts-upgradeable": "^4.9.3",
-    "@typechain/ethers-v6": "^0.4.0",
-    "@typechain/hardhat": "^8.0.0",
-    "@types/mocha": ">=9.1.0",
-    "dotenv": "^16.3.1",
+    "@typechain/ethers-v6": "^0.4.3",
+    "@typechain/hardhat": "^8.0.3",
+    "@types/mocha": "10.0.1",
+    "ethers": "^6.7.0",
     "hardhat": "^2.17.1",
-    "hardhat-gas-reporter": "^1.0.8",
-    "solidity-coverage": "^0.8.1",
+    "hardhat-deploy": "^0.11.34",
+    "hardhat-deploy-ethers": "^0.4.1",
+    "hardhat-gas-reporter": "^1.0.9",
     "ts-node": "^10.9.1",
-    "typechain": "^8.2.0"
+    "typechain": "^8.3.1"
   }
 }
