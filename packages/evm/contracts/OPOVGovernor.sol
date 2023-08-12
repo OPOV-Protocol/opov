@@ -19,7 +19,7 @@ GovernorTimelockControl
 {
     constructor(IVotes _token, TimelockController _timelock)
     Governor("OPOVGovernor")
-    GovernorSettings(7200 /* 1 day */, 100800 /* 2 weeks */, 0)
+    GovernorSettings(7200 /* 1 day */, 100800 /* 2 weeks */, 1)
     GovernorVotes(_token)
     GovernorVotesQuorumFraction(4)
     GovernorTimelockControl(_timelock)
