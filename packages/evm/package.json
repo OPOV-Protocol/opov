@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "compile": "hardhat compile",
+    "compile": "hardhat compile --show-stack-traces ",
     "deploy-verifier": "hardhat deploy --tags verifier --network optimism-goerli",
     "set-attester": "hardhat setAttester --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network optimism-goerli",
     "deploy-attester": "hardhat deploy --tags attester --network base-goerli",

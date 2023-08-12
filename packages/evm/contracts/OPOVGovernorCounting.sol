@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 
-pragma solidity ^0.8.0;
-
-import "@openzeppelin/contracts/governance/Governor.sol";
+import "@openzeppelin/contracts-upgradeable/governance/GovernorUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Extension of {Governor} for simple, 3 options, vote counting.
  *
  * _Available since v4.3._
  */
-abstract contract OPOVGovernorCounting is Governor {
+abstract contract OPOVGovernorCounting is Initializable, GovernorUpgradeable {
+    function __OPOVGovernorCounting_init() internal onlyInitializing {
+    }
+
+    function __OPOVGovernorCounting_init_unchained() internal onlyInitializing {
+    }
+
     /**
      * @dev Supported vote types. Matches Governor Bravo ordering.
      */
