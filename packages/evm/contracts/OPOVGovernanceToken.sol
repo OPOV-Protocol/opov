@@ -28,6 +28,10 @@ ERC20Votes
         _mint(to, amount);
     }
 
+    function decimals() public view virtual override returns (uint8) {
+        return 0;
+    }
+
     // The following functions are overrides required by Solidity.
 
     function _afterTokenTransfer(

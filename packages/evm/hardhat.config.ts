@@ -49,6 +49,21 @@ task('setVerifier', 'Set attester address on verifier')
         await attesterInstance.setVerifier(args.verifier);
     });
 
+task('testMint', 'Test minting')
+    .addOptionalParam('address', 'Address')
+    .addParam('amount', 'Amount')
+    .setAction(async (args: { address: string, amount: string }, hre: HardhatRuntimeEnvironment) => {
+        const {ethers} = hre;
+
+        const signer: Signer = (await ethers.getSigners())[0];
+        const OPOVGovernanceToken = await ethers.getContractFactory('OPOVGovernanceToken');
+        const contract = OPOVGovernanceToken.attach(args.address).connect(signer) as Contract;
+        const address = await signer.getAddress();
+
+        await contract.mint(address, args.amount);
+        console.log(`Minted ${args.amount} to ${args.address}`);
+    });
+
 task('balance', 'Get balance')
     .addOptionalParam('address', 'Address')
     .setAction(async (args: { address: string }, hre: HardhatRuntimeEnvironment) => {
