@@ -4,19 +4,18 @@ import Image from 'next/image'
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation'
-import {useEffect} from 'react'
 
 export default function Home() {
 
   const router = useRouter()
 
-  const { isConnected } = useAccount()
-
-  useEffect(() => {
-    if (isConnected) {
-      router.push('/dashboard');
-    }
-  }, [isConnected]);
+  const {isConnected} = useAccount({
+    onConnect({isReconnected }) {
+      if (!isReconnected) {
+        router.push('/dashboard');
+      }
+    },
+  })
 
   return (
     <main className="landing flex h-screen overflow-hidden flex-col items-center p-10">
