@@ -19,7 +19,7 @@ export default function Home() {
   }, [isConnected]);
 
   return (
-    <main className="flex h-screen overflow-hidden flex-col items-center p-10">
+    <main className="landing flex h-screen overflow-hidden flex-col items-center p-10">
 
       <div className="w-full grid grid-cols-3">
         <div className="col-start-2 flex justify-center">

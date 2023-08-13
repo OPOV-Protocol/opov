@@ -8,7 +8,7 @@
   --background-end-rgb: 198, 238, 214;
 }
 
-body {
+main.landing {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
       to bottom,
