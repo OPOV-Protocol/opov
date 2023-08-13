@@ -1,7 +1,5 @@
 # dependencies
 /node_modules
-/.pnp
-.pnp.js
 
 # misc
 .DS_Store
@@ -18,4 +16,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-.idea/
+# IDEs and editors
+/.idea/
+.vscode/
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions

@@ -25,6 +25,5 @@
     "typescript": "5.1.6",
     "viem": "^1.6.0",
     "wagmi": "^1.3.10"
-  },
-  "devDependencies": {}
+  }
 }

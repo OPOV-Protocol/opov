@@ -2,7 +2,7 @@
   "name": "opov",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "yarn@1.22.17",
+  "packageManager": "yarn@3.6.1",
   "workspaces": [
     "packages/evm",
     "packages/frontend"
