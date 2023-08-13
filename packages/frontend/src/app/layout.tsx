@@ -7,7 +7,7 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'OPOV',
+  title: 'OPOV - DOAs for People',
   description: 'OPOV is an open protocol enabling DAOs to leverage WorldID for sybil-resistant, one person one vote participation.',
 }
 
