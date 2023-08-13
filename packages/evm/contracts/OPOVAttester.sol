@@ -57,7 +57,7 @@ contract OPOVAttester is Ownable, NonblockingLzApp {
 
     function setVerifier(address _verifier) public onlyOwner {
         verifier = _verifier;
-        setTrustedRemoteAddress(dstChainId, abi.encode(verifier));
+        setTrustedRemoteAddress(dstChainId, verifier);
         emit VerifierSet(verifier);
     }
 

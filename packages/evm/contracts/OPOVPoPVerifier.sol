@@ -93,7 +93,7 @@ contract OPOVPoPVerifier is NonblockingLzApp, ReentrancyGuard {
 
     function setAttester(address _attester) public onlyOwner {
         attester = _attester;
-        setTrustedRemoteAddress(dstChainId, abi.encode(_attester));
+        setTrustedRemoteAddress(dstChainId, _attester);
         emit AttesterSet(_attester);
     }
 

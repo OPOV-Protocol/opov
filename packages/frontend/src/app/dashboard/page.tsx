@@ -2,11 +2,13 @@
 
 import Image from 'next/image'
 import {ConnectButton} from '@rainbow-me/rainbowkit'
-import {IDKitWidget} from '@worldcoin/idkit'
-import {IExperimentalSuccessResult, OrbSignalProof} from '@worldcoin/idkit/build/src/types'
-import {useAccount} from 'wagmi'
+import {CredentialType, IDKitWidget, ISuccessResult} from '@worldcoin/idkit'
+import {useAccount, useContractWrite, usePrepareContractWrite} from 'wagmi'
 import React, {useEffect, useState} from 'react'
 import {useRouter} from 'next/navigation'
+import verifierArtifact from '../../lib/contracts/OPOVPoPVerifier.json'
+import { decodeAbiParameters } from 'viem'
+import { Progress } from "@/components/ui/progress"
 
 export default function Dashboard(): React.ReactElement {
 
@@ -14,7 +16,9 @@ export default function Dashboard(): React.ReactElement {
 
   const {address, isConnected} = useAccount()
 
-  const [proof, setProof] = useState<OrbSignalProof>()
+  const [verifying, setVerifying] = useState(false)
+
+  const [proof, setProof] = useState<ISuccessResult>()
 
   useEffect(() => {
     if (!isConnected) {
@@ -23,23 +27,38 @@ export default function Dashboard(): React.ReactElement {
     }
   }, [isConnected])
 
+  const { config } = usePrepareContractWrite({
+    address: '0x35e5cbaf49408f8972E06247074f72D1D6382d22',
+    abi: verifierArtifact.abi,
+    enabled: proof != null && address != null,
+    functionName: 'verifyAndExecute',
+    args: proof && address ? [
+      address,
+      proof.merkle_root,
+      proof.nullifier_hash,
+      // @ts-ignore
+      decodeAbiParameters([{ type: 'uint256[8]' }], proof.proof)[0]
+    ] : [],
+  })
+
+  const { write } = useContractWrite(config)
+
   function onSuccess() {
     console.log('onSuccess called')
+    setVerifying(true)
   }
 
-  function handleVerify(credential: IExperimentalSuccessResult) {
-    console.log('handleVerify: credential', credential)
+  async function handleVerify(credential: ISuccessResult) {
+    console.log('handleVerify: credential', JSON.stringify(credential))
     if (credential.credential_type !== 'orb') {
       console.log('credential type is not orb')
       // TODO show error dialog
       return
     }
 
-    if ('proof' in credential) {
-      const payload = credential.proof as OrbSignalProof
-      setProof(payload)
-      console.log('handleVerify: set proof', proof, payload);
-    }
+    setProof(credential)
+    console.log('handleVerify: calling verifyAndExecute with address', address);
+    write?.()
   }
 
   return (
@@ -84,12 +103,11 @@ export default function Dashboard(): React.ReactElement {
 
                 <IDKitWidget
                   app_id="app_staging_465fadc3db6afe30e7b43ea029771dcd"
-                  walletConnectProjectId="5dfbd43856c7249059f54d1a60b2614a"
                   action="pop-verification"
                   signal={address}
                   autoClose={true}
                   onSuccess={onSuccess}
-                  credential_types={['orb']}
+                  credential_types={[CredentialType.Orb]}
                   handleVerify={handleVerify}
                 >
                   {({open}) =>
@@ -120,6 +138,39 @@ export default function Dashboard(): React.ReactElement {
                   height={736}
                   priority
                 />
+              </div>
+
+            </div>
+
+          </div>
+        ) : verifying ? (
+          <div id="verify" className="flex flex-col flex-grow justify-center items-center py-12">
+
+            <div className="bg-white rounded-xl shadow-2xl pt-24 pr-24 flex justify-center max-w-5xl">
+
+              <div className="w-1/2 flex justify-end items-end">
+                <Image
+                  src="/man-waving.jpg"
+                  alt="A man waving"
+                  width={922}
+                  height={1639}
+                  priority
+                />
+              </div>
+
+              <div className="flex flex-col w-1/2 pb-24 gap-4 justify-center">
+                <div className="text-5xl font-semibold tracking-tighter">
+                  Generating your Proof of Personhood...
+                </div>
+
+                <div className="text-sm pt-4 leading-snug">
+                  This may take a few minutes. Please do not close this window.
+                </div>
+
+                <div className="py-4">
+                  <Progress value={33} />
+                </div>
+
               </div>
 
             </div>

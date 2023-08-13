@@ -5,12 +5,12 @@
   "scripts": {
     "compile": "hardhat compile",
     "deploy-verifier": "hardhat deploy --tags verifier --network optimism-goerli",
-    "set-attester": "hardhat setAttester --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network optimism-goerli",
+    "set-attester": "hardhat setAttester --verifier 0x35e5cbaf49408f8972E06247074f72D1D6382d22 --attester 0x87ba3B9ab5aa1D4e935439c7dbF5c7eF10abA4cB --network optimism-goerli",
     "deploy-attester": "hardhat deploy --tags attester --network base-goerli",
-    "set-verifier": "hardhat setVerifier --verifier 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 --attester 0xb2449Cea80531DE530f6d5dD2996d62e28F56346 --network base-goerli",
+    "set-verifier": "hardhat setVerifier --verifier 0x35e5cbaf49408f8972E06247074f72D1D6382d22 --attester 0x87ba3B9ab5aa1D4e935439c7dbF5c7eF10abA4cB --network base-goerli",
     "deploy-dao": "hardhat deploy --tags dao --network base-goerli",
-    "balance": "hardhat balance --network optimism-goerli",
-    "listAccounts": "hardhat listAccounts --network optimism-goerli",
+    "balance": "hardhat balance --network base-goerli",
+    "listAccounts": "hardhat listAccounts --network base-goerli",
     "clean": "hardhat clean",
     "verify-verifier": "hardhat verify --network optimism-goerli 0x1620d6fdf3e964b82E0Ab5Cb67f2b061EB7DB714 0x11cA3127182f7583EfC416a8771BD4d11Fae4334 app_staging_465fadc3db6afe30e7b43ea029771dcd pop-verification 0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1 10160",
     "mint": "hardhat testMint --address 0x6CB9e58B5E807B27ee9Fc98bF05F5A03f35408f9 --amount 100 --network base-goerli"

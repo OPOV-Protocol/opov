@@ -6,7 +6,7 @@ import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
 import '@typechain/hardhat'
 import '@nomicfoundation/hardhat-ethers'
-import '@nomicfoundation/hardhat-chai-matchers'
+// import '@nomicfoundation/hardhat-chai-matchers'
 import "@nomicfoundation/hardhat-verify";
 
 import {HardhatUserConfig, task} from 'hardhat/config';
@@ -91,7 +91,7 @@ const config: HardhatUserConfig = {
             },
         },
     },
-    defaultNetwork: 'optimism-goerli',
+    defaultNetwork: 'base-goerli',
     networks: {
         'optimism-mainnet': {
             url: `https://optimism-mainnet.infura.io/v3/${process.env.INFURA_KEY}`,
