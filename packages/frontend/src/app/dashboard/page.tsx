@@ -89,7 +89,12 @@ export default function Dashboard(): React.ReactElement {
         </div>
 
         <div className="flex justify-end">
-          <ConnectButton/>
+          <ConnectButton
+            showBalance={{
+              smallScreen: false,
+              largeScreen: false,
+            }}
+          />
         </div>
 
       </div>
