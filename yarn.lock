@@ -196,16 +196,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethereum-attestation-service/eas-sdk@npm:^1.0.0-beta.0":
-  version: 1.0.0-beta.0
-  resolution: "@ethereum-attestation-service/eas-sdk@npm:1.0.0-beta.0"
+"@ethereum-attestation-service/eas-sdk@npm:^1.1.0-beta.2":
+  version: 1.1.0-beta.2
+  resolution: "@ethereum-attestation-service/eas-sdk@npm:1.1.0-beta.2"
   dependencies:
     "@ethereum-attestation-service/eas-contracts": 1.0.0-beta.0
-    ethers: ^6.6.5
+    ethers: ^6.7.0
     js-base64: ^3.7.5
     multiformats: 9.9.0
     pako: ^2.1.0
-  checksum: 3d471f30b70d9eb0de588769498dca02c810fe600fdf2f60135263f7980e31c8c43c01e804e22c79c3cc4e2e479b882a044cc212df31cb2d0426d6e5c5f62818
+  checksum: c5c7444bcc7cf9c8b8b954367a1f89311f0ec49344f95e1e879c63fec14b9c878a5e792ce5dcd574cf78ebda2917b0abfa700d3fe862f08e35b951d829500caf
   languageName: node
   linkType: hard
 
@@ -1436,7 +1436,7 @@ __metadata:
   resolution: "@opov/evm@workspace:packages/evm"
   dependencies:
     "@ethereum-attestation-service/eas-contracts": ^1.0.0-beta.0
-    "@ethereum-attestation-service/eas-sdk": ^1.0.0-beta.0
+    "@ethereum-attestation-service/eas-sdk": ^1.1.0-beta.2
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.2
     "@nomicfoundation/hardhat-ethers": ^3.0.4
     "@nomicfoundation/hardhat-toolbox": ^3.0.0
@@ -6178,7 +6178,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^6.6.5, ethers@npm:^6.7.0":
+"ethers@npm:^6.7.0":
   version: 6.7.0
   resolution: "ethers@npm:6.7.0"
   dependencies:

@@ -3,7 +3,8 @@
 import Image from 'next/image'
 import {ConnectButton} from '@rainbow-me/rainbowkit'
 import {CredentialType, IDKitWidget, ISuccessResult} from '@worldcoin/idkit'
-import {useAccount, useContractWrite, usePrepareContractWrite} from 'wagmi'
+import {useAccount} from 'wagmi'
+import { prepareWriteContract, writeContract } from '@wagmi/core'
 import React, {useEffect, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import verifierArtifact from '../../lib/contracts/OPOVPoPVerifier.json'
@@ -27,29 +28,15 @@ export default function Dashboard(): React.ReactElement {
     }
   }, [isConnected])
 
-  const { config } = usePrepareContractWrite({
-    address: '0x35e5cbaf49408f8972E06247074f72D1D6382d22',
-    abi: verifierArtifact.abi,
-    enabled: proof != null && address != null,
-    functionName: 'verifyAndExecute',
-    args: proof && address ? [
-      address,
-      proof.merkle_root,
-      proof.nullifier_hash,
-      // @ts-ignore
-      decodeAbiParameters([{ type: 'uint256[8]' }], proof.proof)[0]
-    ] : [],
-  })
-
-  const { write } = useContractWrite(config)
 
   function onSuccess() {
     console.log('onSuccess called')
-    setVerifying(true)
   }
 
   async function handleVerify(credential: ISuccessResult) {
-    console.log('handleVerify: credential', JSON.stringify(credential))
+    if (!credential) throw new Error('credential is undefined')
+
+    console.log('handleVerify: credential', credential)
     if (credential.credential_type !== 'orb') {
       console.log('credential type is not orb')
       // TODO show error dialog
@@ -57,8 +44,34 @@ export default function Dashboard(): React.ReactElement {
     }
 
     setProof(credential)
-    console.log('handleVerify: calling verifyAndExecute with address', address);
-    write?.()
+
+    console.log('handleVerify: calling verifyAndExecute with address', address)
+
+    const {request} = await prepareWriteContract({
+      address: '0x20cF1cBF1F030CfB27D4038Becb24a0f3E5BcF5a',
+      abi: verifierArtifact.abi,
+      functionName: 'verify',
+      args: [
+        credential.merkle_root,
+        credential.nullifier_hash,
+        decodeAbiParameters([{type: 'uint256[8]'}], credential.proof as `0x${string}`)[0]
+      ],
+    })
+
+    console.log('handleVerify: request', request)
+
+    setVerifying(true)
+
+    const {hash} = await writeContract(request);
+
+    console.log('handleVerify: verifyAndExecute hash', hash)
+
+    //
+    // if (isSuccess) {
+    //   console.log('handleVerify: verifyAndExecute called', data)
+    // } else if (isError) {
+    //   console.log('handleVerify: verifyAndExecute failed', error)
+    // }
   }
 
   return (
@@ -85,7 +98,7 @@ export default function Dashboard(): React.ReactElement {
         proof === undefined ? (
           <div id="verify" className="flex flex-col flex-grow justify-center items-center py-12">
 
-            <div className="bg-white rounded-xl shadow-2xl pt-24 pl-24 pr-8 pb-8 flex justify-center max-w-5xl">
+            <div className="bg-white rounded-xl shadow-2xl pt-24 pl-24 pr-8 flex justify-center max-w-5xl">
 
               <div className="flex flex-col w-1/2 pb-24 gap-4">
                 <div className="text-5xl font-semibold tracking-tighter">
@@ -130,7 +143,7 @@ export default function Dashboard(): React.ReactElement {
                 </div>
               </div>
 
-              <div className="w-1/2 flex justify-end items-end">
+              <div className="w-1/2 flex justify-end items-end pb-10">
                 <Image
                   src="/dog.jpg"
                   alt="Woman with dog"
@@ -167,9 +180,11 @@ export default function Dashboard(): React.ReactElement {
                   This may take a few minutes. Please do not close this window.
                 </div>
 
-                <div className="py-4">
-                  <Progress value={33} />
-                </div>
+                {/*{ isLoading &&*/}
+                  <div className="py-4">
+                    <Progress value={33} />
+                  </div>
+                {/*}*/}
 
               </div>
 

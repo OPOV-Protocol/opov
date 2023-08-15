@@ -104,9 +104,9 @@ abstract contract LzApp is Ownable, ILayerZeroReceiver, ILayerZeroUserApplicatio
         emit SetTrustedRemote(_remoteChainId, _path);
     }
 
-    function setTrustedRemoteAddress(uint16 _remoteChainId, address _remoteAddress) internal {
+    function setTrustedRemoteAddress(uint16 _remoteChainId, bytes calldata _remoteAddress) external onlyOwner {
         trustedRemoteLookup[_remoteChainId] = abi.encodePacked(_remoteAddress, address(this));
-        emit SetTrustedRemoteAddress(_remoteChainId, abi.encode(_remoteAddress));
+        emit SetTrustedRemoteAddress(_remoteChainId, _remoteAddress);
     }
 
     function getTrustedRemoteAddress(uint16 _remoteChainId) external view returns (bytes memory) {
