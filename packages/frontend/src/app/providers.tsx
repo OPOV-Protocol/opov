@@ -56,7 +56,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         theme={lightTheme({
           accentColor: '#55c076',
           borderRadius: 'large',
-          overlayBlur: 'small',
+          overlayBlur: 'large',
         })}
       >
         {mounted && children}

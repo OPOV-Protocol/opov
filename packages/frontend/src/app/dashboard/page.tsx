@@ -3,21 +3,17 @@
 import Image from 'next/image'
 import {ConnectButton} from '@rainbow-me/rainbowkit'
 import {CredentialType, IDKitWidget, ISuccessResult} from '@worldcoin/idkit'
-import {useAccount} from 'wagmi'
-import { prepareWriteContract, writeContract } from '@wagmi/core'
+import {useAccount, useContractEvent} from 'wagmi'
 import React, {useEffect, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import verifierArtifact from '../../lib/contracts/OPOVPoPVerifier.json'
-import { decodeAbiParameters } from 'viem'
-import { Progress } from "@/components/ui/progress"
+import Verifier from '@/components/Verifier'
 
 export default function Dashboard(): React.ReactElement {
 
   const router = useRouter()
 
   const {address, isConnected} = useAccount()
-
-  const [verifying, setVerifying] = useState(false)
 
   const [proof, setProof] = useState<ISuccessResult>()
 
@@ -28,6 +24,14 @@ export default function Dashboard(): React.ReactElement {
     }
   }, [isConnected])
 
+  useContractEvent({
+    address: process.env.NEXT_PUBLIC_VERIFIER_ADDRESS! as `0x${string}`,
+    abi: verifierArtifact.abi,
+    eventName: 'AttestationCreated',
+    listener(log) {
+      console.log(log)
+    },
+  })
 
   function onSuccess() {
     console.log('onSuccess called')
@@ -45,33 +49,7 @@ export default function Dashboard(): React.ReactElement {
 
     setProof(credential)
 
-    console.log('handleVerify: calling verifyAndExecute with address', address)
-
-    const {request} = await prepareWriteContract({
-      address: '0x20cF1cBF1F030CfB27D4038Becb24a0f3E5BcF5a',
-      abi: verifierArtifact.abi,
-      functionName: 'verify',
-      args: [
-        credential.merkle_root,
-        credential.nullifier_hash,
-        decodeAbiParameters([{type: 'uint256[8]'}], credential.proof as `0x${string}`)[0]
-      ],
-    })
-
-    console.log('handleVerify: request', request)
-
-    setVerifying(true)
-
-    const {hash} = await writeContract(request);
-
-    console.log('handleVerify: verifyAndExecute hash', hash)
-
-    //
-    // if (isSuccess) {
-    //   console.log('handleVerify: verifyAndExecute called', data)
-    // } else if (isError) {
-    //   console.log('handleVerify: verifyAndExecute failed', error)
-    // }
+    console.log('handleVerify: proof valid')
   }
 
   return (
@@ -101,7 +79,7 @@ export default function Dashboard(): React.ReactElement {
 
       {
         proof === undefined ? (
-          <div id="verify" className="flex flex-col flex-grow justify-center items-center py-12">
+          <div id="prove" className="flex flex-col flex-grow justify-center items-center py-12">
 
             <div className="bg-white rounded-xl shadow-2xl pt-24 pl-24 pr-8 flex justify-center max-w-5xl">
 
@@ -121,7 +99,7 @@ export default function Dashboard(): React.ReactElement {
 
                 <IDKitWidget
                   app_id="app_staging_465fadc3db6afe30e7b43ea029771dcd"
-                  action="pop-verification"
+                  action={process.env.NEXT_PUBLIC_EAS_ACTION!}
                   signal={address}
                   autoClose={true}
                   onSuccess={onSuccess}
@@ -161,43 +139,8 @@ export default function Dashboard(): React.ReactElement {
             </div>
 
           </div>
-        ) : verifying ? (
-          <div id="verify" className="flex flex-col flex-grow justify-center items-center py-12">
-
-            <div className="bg-white rounded-xl shadow-2xl pt-24 pr-24 flex justify-center max-w-5xl">
-
-              <div className="w-1/2 flex justify-end items-end">
-                <Image
-                  src="/man-waving.jpg"
-                  alt="A man waving"
-                  width={922}
-                  height={1639}
-                  priority
-                />
-              </div>
-
-              <div className="flex flex-col w-1/2 pb-24 gap-4 justify-center">
-                <div className="text-5xl font-semibold tracking-tighter">
-                  Generating your Proof of Personhood...
-                </div>
-
-                <div className="text-sm pt-4 leading-snug">
-                  This may take a few minutes. Please do not close this window.
-                </div>
-
-                {/*{ isLoading &&*/}
-                  <div className="py-4">
-                    <Progress value={33} />
-                  </div>
-                {/*}*/}
-
-              </div>
-
-            </div>
-
-          </div>
         ) : (
-          <div className="new-div">Content for the new div when proof is not undefined.</div>
+          <Verifier proof={proof} />
         )
       }
 

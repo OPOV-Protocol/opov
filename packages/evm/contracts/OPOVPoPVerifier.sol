@@ -83,7 +83,8 @@ contract OPOVPoPVerifier is Ownable, ReentrancyGuard {
         require(attester != IAttester(address(0)), "Attester not set");
 
         // First, we make sure this person hasn't done this before
-        if (nullifierHashes[_nullifierHash]) revert InvalidNullifier();
+        // TODO uncomment when done testing
+//        if (nullifierHashes[_nullifierHash]) revert InvalidNullifier();
 
         // We now verify the provided proof is valid and the user is verified by World ID
         worldId.verifyProof(

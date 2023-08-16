@@ -68,6 +68,10 @@ contract OPOVAttester is IAttester, Ownable {
         return true;
     }
 
+    function getAttestation(address _address) public view returns (bytes32) {
+        return attestations[_address];
+    }
+
     function createAttestation(PoPSchema memory data) public returns (bytes32) {
         require(verifier != address(0), "Verifier not set");
         require(msg.sender == verifier, "Unauthorized verifier");
