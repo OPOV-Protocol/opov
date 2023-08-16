@@ -11,7 +11,7 @@ export default function Home() {
 
   const { openConnectModal } = useConnectModal()
 
-  const {isConnected} = useAccount({
+  useAccount({
     onConnect({isReconnected }) {
       if (!isReconnected) {
         router.push('/dashboard');

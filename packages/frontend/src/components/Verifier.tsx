@@ -1,9 +1,10 @@
 'use client'
 
-import {useContractEvent, useContractWrite, usePrepareContractWrite} from 'wagmi'
+import {useAccount, useContractRead, useContractWrite, usePrepareContractWrite} from 'wagmi'
 import {waitForTransaction} from '@wagmi/core'
 import {decodeAbiParameters, Log, TransactionReceipt} from 'viem'
 import verifierArtifact from '../lib/contracts/OPOVPoPVerifier.json'
+import attesterArtifact from '../lib/contracts/OPOVAttester.json'
 import {ISuccessResult} from '@worldcoin/idkit'
 import React, {useEffect, useState} from 'react'
 import Image from 'next/image'
@@ -19,6 +20,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 const Verifier = ({proof}: { proof: ISuccessResult }) => {
+
+  const {address} = useAccount()
 
   const [uid, setUid] = useState<string>()
 
@@ -47,13 +50,11 @@ const Verifier = ({proof}: { proof: ISuccessResult }) => {
     data: verificationData
   } = useContractWrite(config)
 
-  useContractEvent({
-    address: process.env.NEXT_PUBLIC_VERIFIER_ADDRESS! as `0x${string}`,
-    abi: verifierArtifact.abi,
-    eventName: 'AttestationCreated',
-    listener(log) {
-      console.log(log)
-    },
+  const {data: uidData, refetch: uidLookup} = useContractRead({
+    address: process.env.NEXT_PUBLIC_ATTESTER_ADDRESS! as `0x${string}`,
+    abi: attesterArtifact.abi,
+    functionName: 'getAttestation',
+    args: [address],
   })
 
   useEffect(() => {
@@ -67,13 +68,8 @@ const Verifier = ({proof}: { proof: ISuccessResult }) => {
 
     const wait = async () => {
       const data: TransactionReceipt = await waitForTransaction({hash: verificationData.hash})
-      const logs: Log<bigint, number>[] = data.logs
-        .filter(log =>
-          log.topics[0] === verifierArtifact.abi.find(
-            (item: any) => item.name === 'AttestationCreated'
-          )
-        )
-      console.log('verificationData logs', logs);
+      console.log('transaction receipt', data)
+      await uidLookup()
     }
 
     wait().catch(console.error)
@@ -89,6 +85,12 @@ const Verifier = ({proof}: { proof: ISuccessResult }) => {
     if (!verificationError) return;
     console.error('Contract write error', verificationError);
   }, [verificationError])
+
+  useEffect(() => {
+    if (!uidData || typeof uidData !== 'string') return;
+    console.log('uidData', uidData);
+    setUid(uidData)
+  }, [uidData])
 
   return (
     <div id="verify" className="flex flex-col flex-grow justify-center items-center py-12">
@@ -138,9 +140,11 @@ const Verifier = ({proof}: { proof: ISuccessResult }) => {
               </div>
 
               <div className="text-base pt-2 pb-4 leading-snug">
-                Welcome, person. You can view your EAS attestation <a
-                href={`https://base-goerli.easscan.org/attestation/view/${uid}`}
-                className="text-green-700 font-medium">here</a>.
+                Welcome, person. You can view your EAS attestation
+                <a href={`https://base-goerli.easscan.org/attestation/view/${uid}`}
+                   className="text-green-700 font-medium" target="_blank">
+                  &nbsp;here
+                </a>.
               </div>
 
               <AlertDialog>
